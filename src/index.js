@@ -1,14 +1,19 @@
 //node src/index.js
 //npm run dev
+require('./models/User');
+require('./models/Track');
 const express = require('express');
 const mongoosse = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
+const trackRoutes = require('./routes/trackRoutes');
+const requireAuth = require('./middlewares/requireAuth');
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(authRoutes);
+app.use(trackRoutes);
 
 const mongoUri =
     'mongodb+srv://admin:adminadmin@cluster0-hvzwe.mongodb.net/test?retryWrites=true&w=majority';
@@ -24,8 +29,8 @@ mongoosse.connection.on('error', (err) => {
     console.error('Error connectiong to mongo', err);
 });
 
-app.get('/', (req, res) => {
-    res.send('Hi there!');
+app.get('/', requireAuth, (req, res) => {
+    res.send(`Your email: ${req.user.email}`);
 });
 
 app.listen(3000, () => {
